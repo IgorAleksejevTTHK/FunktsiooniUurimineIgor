@@ -1,0 +1,141 @@
+@model FunktsiooniUurimineWeb.Models.FunktsiooniUurimine
+@{
+    ViewData["Title"] = "Funktsiooni analüüs";
+}
+
+<div class="page-title details-title">
+    <div>
+        <p class="eyebrow">ANALÜÜS #@Model.Id</p>
+        <h1><code>@Model.Valem</code></h1>
+        <p>Funktsiooni ja tuletise interaktiivne graafik.</p>
+    </div>
+    <div class="form-actions">
+        <a class="button secondary" asp-action="Edit" asp-route-id="@Model.Id">Muuda</a>
+        <a class="button danger" asp-action="Delete" asp-route-id="@Model.Id">Kustuta</a>
+    </div>
+</div>
+
+<div class="analysis-grid">
+    <div class="card">
+        <h2>Määramispiirkond</h2>
+        <p class="big-value">@Model.Maaramispiirkond</p>
+    </div>
+    <div class="card">
+        <h2>Nullkohad</h2>
+        <p class="big-value">@Model.Nullkohad</p>
+    </div>
+    <div class="card">
+        <h2>Tuletis</h2>
+        <p class="big-value">@Model.Tuletis</p>
+    </div>
+    <div class="card">
+        <h2>Kriitilised punktid</h2>
+        <p>@Model.KriitilisedPunktid</p>
+    </div>
+    <div class="card">
+        <h2>Ekstreemumid</h2>
+        <p>@Model.Ekstreemumid</p>
+    </div>
+</div>
+
+<div class="card chart-card">
+    <div class="card-header">
+        <div>
+            <h2>Graafik</h2>
+            <p class="muted">Mõlemad kõverad arvutatakse brauseris valitud vahemikus.</p>
+        </div>
+        <div class="range-controls">
+            <label>Min <input id="xMin" type="number" value="-10" step="1"></label>
+            <label>Max <input id="xMax" type="number" value="10" step="1"></label>
+            <label>Samm <input id="xStep" type="number" value="0.1" min="0.01" max="1" step="0.01"></label>
+            <button id="updateGraph" class="button small" type="button">Uuenda</button>
+        </div>
+    </div>
+    <div class="canvas-wrap"><canvas id="funktsiooniGraafik"></canvas></div>
+    <input type="hidden" id="funktsiooniValem" value="@Model.Valem" />
+    <input type="hidden" id="tuletiseValem" value="@Model.Tuletis" />
+    <div id="graphError" class="validation graph-error"></div>
+</div>
+
+<div class="back-row"><a asp-action="History">← Tagasi ajalukku</a></div>
+
+@section Scripts {
+<script>
+const funktsiooniValem = document.getElementById('funktsiooniValem').value;
+const tuletiseValem = document.getElementById('tuletiseValem').value.replace("f'(x) = ", '');
+let graafik = null;
+
+function koostaFunktsioon(valem) {
+    let e = valem.toLowerCase().replaceAll('π', 'pi').replace(/,/g, '.');
+    if (!/^[0-9a-z_+\-*/^().\s]+$/.test(e)) throw new Error('Valem sisaldab keelatud märke.');
+    const nimed = new Set(['x', 'sin', 'cos', 'tan', 'sqrt', 'ln', 'log', 'exp', 'abs', 'pi', 'e']);
+    const identifiers = e.match(/[a-z_]+/g) || [];
+    for (const nimi of identifiers) {
+        if (!nimed.has(nimi)) throw new Error('Tundmatu sümbol või funktsioon: ' + nimi);
+    }
+    e = e.replaceAll('pi', 'Math.PI')
+         .replaceAll('sin', 'Math.sin')
+         .replaceAll('cos', 'Math.cos')
+         .replaceAll('tan', 'Math.tan')
+         .replaceAll('sqrt', 'Math.sqrt')
+         .replaceAll('ln', 'Math.log')
+         .replaceAll('log', 'Math.log10')
+         .replaceAll('exp', 'Math.exp')
+         .replaceAll('abs', 'Math.abs')
+         .replace(/\be\b/g, 'Math.E')
+         .replaceAll('^', '**');
+    // Pärast whitelist-kontrolli on Function ainult kontrollitud matemaatilise avaldise täitmiseks.
+    return new Function('x', 'return (' + e + ');');
+}
+
+function joonistaGraafik() {
+    const error = document.getElementById('graphError');
+    error.textContent = '';
+    try {
+        const f = koostaFunktsioon(funktsiooniValem);
+        const fp = koostaFunktsioon(tuletiseValem);
+        const min = Number(document.getElementById('xMin').value);
+        const max = Number(document.getElementById('xMax').value);
+        const step = Number(document.getElementById('xStep').value);
+        if (!(step > 0) || !(min < max) || (max - min) / step > 5000) throw new Error('Kontrolli graafiku vahemikku ja sammu.');
+
+        const punktidF = [];
+        const punktidFp = [];
+        for (let x = min; x <= max + step / 100; x += step) {
+            let y1 = Number(f(x));
+            let y2 = Number(fp(x));
+            if (!Number.isFinite(y1) || Math.abs(y1) > 1e8) y1 = null;
+            if (!Number.isFinite(y2) || Math.abs(y2) > 1e8) y2 = null;
+            punktidF.push({x, y: y1});
+            punktidFp.push({x, y: y2});
+        }
+
+        const ctx = document.getElementById('funktsiooniGraafik').getContext('2d');
+        if (graafik) graafik.destroy();
+        graafik = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    { label: 'f(x) = ' + funktsiooniValem, data: punktidF, parsing: false, borderColor: '#2563eb', pointRadius: 0, borderWidth: 2, tension: 0.15, spanGaps: false },
+                    { label: "f'(x) = " + tuletiseValem, data: punktidFp, parsing: false, borderColor: '#ef4444', borderDash: [7, 5], pointRadius: 0, borderWidth: 2, tension: 0.15, spanGaps: false }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', intersect: false },
+                scales: {
+                    x: { type: 'linear', title: { display: true, text: 'x' }, grid: { color: '#e5e7eb' } },
+                    y: { title: { display: true, text: 'y' }, grid: { color: '#e5e7eb' } }
+                }
+            }
+        });
+    } catch (e) {
+        error.textContent = 'Graafikut ei saanud joonistada: ' + e.message;
+    }
+}
+
+document.getElementById('updateGraph').addEventListener('click', joonistaGraafik);
+window.addEventListener('load', joonistaGraafik);
+</script>
+}

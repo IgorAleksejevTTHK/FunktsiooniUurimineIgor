@@ -1,0 +1,31 @@
+@model FunktsiooniUurimineWeb.Models.FunktsiooniUurimine
+@{
+    ViewData["Title"] = "Muuda funktsiooni";
+}
+<div class="page-title">
+    <div>
+        <p class="eyebrow">UPDATE</p>
+        <h1>Muuda funktsiooni</h1>
+        <p>Valemi muutmisel arvutatakse kõik tuletatud andmed uuesti.</p>
+    </div>
+</div>
+<div class="card narrow">
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        <input asp-for="Id" type="hidden" />
+        <input asp-for="LuodudAeg" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+        <label asp-for="Valem"></label>
+        <input asp-for="Valem" class="input" />
+        <span asp-validation-for="Valem" class="validation"></span>
+        <div class="hint">Kasuta klaviatuuri all olevaid nuppe, et sisestada toetatud matemaatilised tehted ja funktsioonid.</div>
+        <partial name="_MathKeyboard" />
+        <div class="form-actions">
+            <button type="submit" class="button">Salvesta muudatus</button>
+            <a class="button secondary" asp-action="Details" asp-route-id="@Model.Id">Katkesta</a>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/math-keyboard.js" asp-append-version="true"></script>
+}

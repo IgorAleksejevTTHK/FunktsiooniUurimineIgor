@@ -1,0 +1,51 @@
+@model FunktsiooniUurimineWeb.Models.FunktsiooniUurimine
+@{
+    ViewData["Title"] = "Kiire funktsiooni lahendamine";
+}
+
+<section class="hero">
+    <div>
+        <p class="eyebrow">KIIRLAHENDUS</p>
+        <h1>Funktsiooni uurimine</h1>
+        <p class="lead">Sisesta funktsioon ja vaata kiiresti põhitulemusi. See lahendus salvestatakse ajalukku ainult siis, kui kasutad eraldi funktsiooni lisamise vormi.</p>
+    </div>
+</section>
+
+<div class="card narrow">
+    <form asp-action="Index" method="post">
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+        <label asp-for="Valem"></label>
+        <input asp-for="Valem" class="input" placeholder="nt x^3 - 3*x" autofocus />
+        <span asp-validation-for="Valem" class="validation"></span>
+        <div class="hint">
+            Toetatud: <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>^</code>, sulud,
+            <code>x</code>, <code>sin()</code>, <code>cos()</code>, <code>tan()</code>, <code>sqrt()</code>,
+            <code>ln()</code>, <code>log()</code>, <code>exp()</code>, <code>abs()</code>, <code>pi</code>, <code>e</code>.
+        </div>
+        <partial name="_MathKeyboard" />
+        <div class="form-actions">
+            <button type="submit" class="button">Lahenda kiiresti</button>
+            <a class="button secondary" asp-action="History">Ajalugu</a>
+        </div>
+    </form>
+</div>
+
+@if (ViewBag.AnaluusTehtud == true)
+{
+    <div class="card">
+        <div class="card-header"><h2>Tulemus: <code>@Model.Valem</code></h2><span class="badge">Kiirvaade</span></div>
+        <div class="analysis-grid">
+            <div class="card"><h2>Määramispiirkond</h2><p class="big-value">@Model.Maaramispiirkond</p></div>
+            <div class="card"><h2>Nullkohad</h2><p class="big-value">@Model.Nullkohad</p></div>
+            <div class="card"><h2>Tuletis</h2><p class="big-value">@Model.Tuletis</p></div>
+            <div class="card"><h2>Kriitilised punktid</h2><p>@Model.KriitilisedPunktid</p></div>
+            <div class="card"><h2>Ekstreemumid</h2><p>@Model.Ekstreemumid</p></div>
+        </div>
+        <p class="muted">Soovid hiljem lahendust uuesti vaadata? Ava ajalugu ja salvesta funktsioon läbi valiku „Uus funktsioon“.</p>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/math-keyboard.js" asp-append-version="true"></script>
+}

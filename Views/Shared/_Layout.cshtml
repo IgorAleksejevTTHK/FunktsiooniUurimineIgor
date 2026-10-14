@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Funktsioonide uurimine</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+    <div class="container nav">
+        <a class="brand" asp-controller="Funktsioon" asp-action="Index">Funktsioonide uurimine</a>
+        <nav>
+            <a asp-controller="Funktsioon" asp-action="Index">Kiirlahendus</a>
+            <a asp-controller="Funktsioon" asp-action="History">Ajalugu</a>
+            <a class="button small" asp-controller="Funktsioon" asp-action="Create">+ Uus funktsioon</a>
+        </nav>
+    </div>
+</header>
+<main class="container content">
+    @if (TempData["Teade"] is string teade)
+    {
+        <div class="alert success">@teade</div>
+    }
+    @RenderBody()
+</main>
+<footer class="footer">
+    <div class="container">ASP.NET Core MVC · EF Core · SQLite · Chart.js</div>
+</footer>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

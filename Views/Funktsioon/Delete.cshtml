@@ -1,0 +1,24 @@
+@model FunktsiooniUurimineWeb.Models.FunktsiooniUurimine
+@{
+    ViewData["Title"] = "Kustuta funktsioon";
+}
+<div class="page-title">
+    <div>
+        <p class="eyebrow">DELETE</p>
+        <h1>Kustuta kirje?</h1>
+        <p>See toiming eemaldab funktsiooni analüüsi andmebaasist.</p>
+    </div>
+</div>
+<div class="card narrow">
+    <dl class="details-list">
+        <dt>Valem</dt><dd><code>@Model.Valem</code></dd>
+        <dt>Tuletis</dt><dd><code>@Model.Tuletis</code></dd>
+    </dl>
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div class="form-actions">
+            <button class="button danger" type="submit">Jah, kustuta</button>
+            <a class="button secondary" asp-action="Details" asp-route-id="@Model.Id">Tühista</a>
+        </div>
+    </form>
+</div>

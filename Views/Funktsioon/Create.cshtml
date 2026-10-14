@@ -1,0 +1,37 @@
+@model FunktsiooniUurimineWeb.Models.FunktsiooniUurimine
+@{
+    ViewData["Title"] = "Uus funktsioon";
+}
+
+<div class="page-title">
+    <div>
+        <p class="eyebrow">CREATE</p>
+        <h1>Lisa uus funktsioon</h1>
+        <p>Sisestamisel arvutatakse analüüs automaatselt ja salvestatakse EF Core abil SQLite'i.</p>
+    </div>
+</div>
+
+<div class="card narrow">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+        <label asp-for="Valem"></label>
+        <input asp-for="Valem" class="input" placeholder="x^3 - 3*x" autofocus />
+        <span asp-validation-for="Valem" class="validation"></span>
+        <div class="hint">
+            Toetatud: <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>^</code>, sulud,
+            <code>x</code>, <code>sin()</code>, <code>cos()</code>, <code>tan()</code>, <code>sqrt()</code>,
+            <code>ln()</code>, <code>log()</code>, <code>exp()</code>, <code>abs()</code>, <code>pi</code>, <code>e</code>.
+        </div>
+
+        <partial name="_MathKeyboard" />
+        <div class="form-actions">
+            <button type="submit" class="button">Analüüsi ja salvesta</button>
+            <a class="button secondary" asp-action="Index">Tagasi</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/math-keyboard.js" asp-append-version="true"></script>
+}
